@@ -8,7 +8,6 @@ package ch.bfh.ti.hutzf1.vpriv_server.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 

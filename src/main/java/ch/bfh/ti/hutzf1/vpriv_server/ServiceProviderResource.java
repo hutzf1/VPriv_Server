@@ -15,6 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import org.json.JSONObject;
 
@@ -23,7 +24,7 @@ import org.json.JSONObject;
  *
  * @author fh
  */
-@Path("ServiceProvider")
+@Path("ServiceProvider/{Parameter}")
 public class ServiceProviderResource {
 
     @Context
@@ -40,36 +41,47 @@ public class ServiceProviderResource {
 
     /**
      * Retrieves representation of an instance of ch.bfh.ti.hutzf1.vpriv_server.ServiceProviderResource
+     * @param parameter
      * @return an instance of java.lang.String
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getJson() {
-        return "get completed";
-        
+    public String getJson(@PathParam("Parameter") String parameter) {
+        System.out.println(parameter);
+        JSONObject jo = new JSONObject();
+        switch (parameter) {
+            case "getAllData":
+                sp.
+                return null;
+            case "getControlMethod":
+                return sp.getControlMethod().toString();
+        }
+        return null;
     }
 
     /**
      * PUT method for updating or creating an instance of ServiceProviderResource
-     * @param content representation for the resource
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public void putJson(String str) throws SQLException {
+    public void putJson(@PathParam("Parameter") String parameter, String str) throws SQLException {
         JSONObject jo = new JSONObject(str);
-        System.out.println(jo.getString("type"));
-        switch (jo.getString("type")) {
-            case "roundpackage":
-                //System.out.println("--roundpackage");
-                sp.putVehicleData(jo);
+        System.out.println(parameter);
+        switch (parameter) {
+            case "putRoundpPackage":
+                sp.putRoundPackage(jo);
                 break;
-            case "drivingdata":
-                //System.out.println("--drivingdata");
+            case "putDrivingData":
                 sp.putDrivingData(jo);
                 break;
-            case "costdata":
-                //System.out.println("--costdata");
+            case "putCostData":
                 sp.putCostData(jo);
+                break;
+            case "putPermutedPackage":
+                sp.putPermutedPackage(jo);
+                break;
+            case "putControlData":
+                sp.putControlData(jo);
                 break;
         }
     }

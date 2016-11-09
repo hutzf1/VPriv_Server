@@ -8,17 +8,9 @@ package ch.bfh.ti.hutzf1.vpriv_server.serviceprovider;
 import ch.bfh.ti.hutzf1.vpriv_server.crypto.OneWayFunction;
 import ch.bfh.ti.hutzf1.vpriv_server.crypto.PedersenScheme;
 import ch.bfh.ti.hutzf1.vpriv_server.db.DB;
-/*import ch.bfh.ti.hutzf1.vprivt1.location.Location;
-import ch.bfh.ti.hutzf1.vprivt1.transport.CostTuple;
-import ch.bfh.ti.hutzf1.vprivt1.transport.DrivingTuple;
-import ch.bfh.ti.hutzf1.vprivt1.transport.PermutatedPackage;
-import ch.bfh.ti.hutzf1.vprivt1.transport.RoundPackage;*/
 import ch.bfh.ti.hutzf1.vpriv_server.log.Log;
-import ch.bfh.unicrypt.math.algebra.general.interfaces.Element;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Random;
 import org.json.JSONObject;
 
@@ -45,12 +37,12 @@ public class ServiceProvider {
         this.DB = new DB();
     }
     
-    public void putVehicleData(JSONObject jo) throws SQLException {
+    public void putRoundPackage(JSONObject jo) throws SQLException {
         //System.out.println("IIIDDD: " + jo.getString("id"));
-        DB.connect();
+        //DB.connect();
         //DB.query("INSERT INTO Vehicles VALUES (N'" + jo.getString("id") + "');");
-        DB.query("SELECT * FROM Vehicles;");
-        DB.disconnect();
+        //DB.query("SELECT * FROM Vehicles;");
+        //DB.disconnect();
         // RP.add(RI);
     }
     
@@ -77,9 +69,17 @@ public class ServiceProvider {
         this.PP.add(pp);
     }*/
     
-    public int getCheckMethod() {
+    public JSONObject getControlMethod() {
+        JSONObject jo = new JSONObject();
         Random rand = new Random();
-        return rand.nextInt(2);
+        jo.put("bi", rand.nextInt(2));
+        return jo;
+    }
+    
+    public JSONObject getAllData() {
+        JSONObject jo = new JSONObject();
+        // SQL QUERY
+        return jo;
     }
     
     /*public int calculate0(String id, Element key, ArrayList<Element> dc) throws IOException {
@@ -188,4 +188,12 @@ public class ServiceProvider {
         
         return sum;
     }*/
+
+    public void putPermutedPackage(JSONObject jo) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void putControlData(JSONObject jo) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
