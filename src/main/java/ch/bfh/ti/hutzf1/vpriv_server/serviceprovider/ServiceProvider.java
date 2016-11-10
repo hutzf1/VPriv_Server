@@ -39,8 +39,8 @@ public class ServiceProvider {
     
     public void putRoundPackage(JSONObject jo) throws SQLException {
         //System.out.println("IIIDDD: " + jo.getString("id"));
-        //DB.connect();
-        //DB.query("INSERT INTO Vehicles VALUES (N'" + jo.getString("id") + "');");
+        DB.connect();
+        DB.query("INSERT INTO Vehicles VALUES (N'" + jo.getString("id") + "');");
         //DB.query("SELECT * FROM Vehicles;");
         //DB.disconnect();
         // RP.add(RI);

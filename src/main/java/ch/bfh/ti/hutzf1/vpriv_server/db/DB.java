@@ -11,6 +11,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.microsoft.sqlserver.jdbc.*;
+
 /**
  *
  * @author fh
@@ -34,10 +36,10 @@ public class DB {
     
     public void connect() {
         try {  
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            //Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             connection = DriverManager.getConnection(connectionString);  
         }  
-        catch (ClassNotFoundException | SQLException e) {  
+        catch (SQLException e) {  
             e.printStackTrace();  
         }  
         finally {  

@@ -26,7 +26,6 @@ import org.json.JSONObject;
  */
 @Path("ServiceProvider/{Parameter}")
 public class ServiceProviderResource {
-
     @Context
     private UriInfo context;
 
@@ -51,8 +50,7 @@ public class ServiceProviderResource {
         JSONObject jo = new JSONObject();
         switch (parameter) {
             case "getAllData":
-                sp.
-                return null;
+                return sp.getAllData().toString();
             case "getControlMethod":
                 return sp.getControlMethod().toString();
         }
@@ -61,6 +59,9 @@ public class ServiceProviderResource {
 
     /**
      * PUT method for updating or creating an instance of ServiceProviderResource
+     * @param parameter
+     * @param str
+     * @throws java.sql.SQLException
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -68,8 +69,9 @@ public class ServiceProviderResource {
         JSONObject jo = new JSONObject(str);
         System.out.println(parameter);
         switch (parameter) {
-            case "putRoundpPackage":
+            case "putRoundPackage":
                 sp.putRoundPackage(jo);
+                System.out.println(PUUUTROUND);
                 break;
             case "putDrivingData":
                 sp.putDrivingData(jo);
