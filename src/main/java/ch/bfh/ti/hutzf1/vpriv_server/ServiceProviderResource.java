@@ -45,7 +45,7 @@ public class ServiceProviderResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getJson(@PathParam("Parameter") String parameter) {
+    public String getJson(@PathParam("Parameter") String parameter) throws SQLException {
         System.out.println(parameter);
         JSONObject jo = new JSONObject();
         switch (parameter) {
@@ -71,7 +71,6 @@ public class ServiceProviderResource {
         switch (parameter) {
             case "putRoundPackage":
                 sp.putRoundPackage(jo);
-                System.out.println(PUUUTROUND);
                 break;
             case "putDrivingData":
                 sp.putDrivingData(jo);
@@ -82,8 +81,11 @@ public class ServiceProviderResource {
             case "putPermutedPackage":
                 sp.putPermutedPackage(jo);
                 break;
-            case "putControlData":
-                sp.putControlData(jo);
+            case "putControlData0":
+                sp.putControlData0(jo);
+                break;
+            case "putControlData1":
+                sp.putControlData1(jo);
                 break;
         }
     }

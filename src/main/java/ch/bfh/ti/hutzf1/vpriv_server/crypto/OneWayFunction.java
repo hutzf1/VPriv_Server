@@ -7,6 +7,7 @@
 package ch.bfh.ti.hutzf1.vpriv_server.crypto;
 
 import ch.bfh.unicrypt.math.algebra.general.interfaces.Element;
+import java.math.BigInteger;
 //import java.math.BigInteger;
 
 /**
@@ -15,8 +16,9 @@ import ch.bfh.unicrypt.math.algebra.general.interfaces.Element;
  */
 
 public class OneWayFunction {
-        public Element getHash(Element message, Element key) {
-            return message.invert();
+        public BigInteger getHash(BigInteger message, BigInteger key) {
+            //return message.invert();
+            return message;
             /*BigInteger bigMessage = message.convertToBigInteger();
             BigInteger bigKey = key.convertToBigInteger();
             bigMessage.add(bigKey);
