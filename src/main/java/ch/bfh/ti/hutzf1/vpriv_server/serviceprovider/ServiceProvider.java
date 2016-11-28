@@ -40,16 +40,37 @@ public class ServiceProvider {
         this.DB = new DB();
     }
     
+    private void cleanUp() throws SQLException {
+        DB.execute("DELETE FROM Vehicles");
+        DB.execute("DBCC CHECKIDENT (Vehicles, RESEED, 0)");
+        DB.execute("DELETE FROM Toll");
+        DB.execute("DBCC CHECKIDENT (Toll, RESEED, 0)");
+        DB.execute("DELETE FROM Tags");
+        DB.execute("DBCC CHECKIDENT (Tags, RESEED, 0)");
+        DB.execute("DELETE FROM RoundKeys");
+        DB.execute("DBCC CHECKIDENT (RoundKeys, RESEED, 0)");
+        DB.execute("DELETE FROM Round");
+        DB.execute("DBCC CHECKIDENT (Round, RESEED, 0)");
+        DB.execute("DELETE FROM DrivingRecords");
+        DB.execute("DBCC CHECKIDENT (DrivingRecords, RESEED, 0)");
+        DB.execute("DELETE FROM PermutedRecords");
+        DB.execute("DBCC CHECKIDENT (PermutedRecords, RESEED, 0)");
+    }
+    
     public void putRoundPackage(JSONObject jo) throws SQLException {
         DB.connect();
-        DB.execute("INSERT INTO Vehicles VALUES (N'" + jo.getString("id") + "');");
-        log.console("INSERT INTO Vehicles VALUES (N'" + jo.getString("id") + "');");
-        ResultSet rs = DB.executeQuery("SELECT ID FROM Vehicles WHERE LicensePlate = N'" + jo.getString("id") + "'");
         String getId = "";
+        if(jo.getInt("round") == 0) {
+            cleanUp();
+            DB.execute("INSERT INTO Vehicles VALUES (N'" + jo.getString("id") + "');");
+            log.console("INSERT INTO Vehicles VALUES (N'" + jo.getString("id") + "');");
+        }
+        
+        ResultSet rs = DB.executeQuery("SELECT ID FROM Vehicles WHERE LicensePlate = N'" + jo.getString("id") + "'");
         while (rs.next()) {
             getId = rs.getString("ID");
         }
-        log.console(rs.toString());
+        
         log.console("SELECT ID FROM Vehicles WHERE LicensePlate = N'" + jo.getString("id") + "';");
         for(int i = 0; i < jo.length()-4; i++) {
             DB.execute("INSERT INTO Tags VALUES (" + getId + ", " + jo.getInt("round") + ", " + jo.getBigInteger("v" + i) + ");");
