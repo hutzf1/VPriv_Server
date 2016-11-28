@@ -5,6 +5,7 @@
  */
 package ch.bfh.ti.hutzf1.vpriv_server.crypto;
 
+import ch.bfh.unicrypt.UniCryptException;
 import ch.bfh.unicrypt.crypto.schemes.commitment.classes.PedersenCommitmentScheme;
 import ch.bfh.unicrypt.helper.array.classes.ByteArray;
 import ch.bfh.unicrypt.math.algebra.general.classes.BooleanElement;
@@ -19,9 +20,7 @@ import java.math.BigInteger;
  */
 
 public class PedersenScheme {
-    //private final CyclicGroup CYCLICGROUP = GStarModSafePrime.getInstance(2698727);
-    BigInteger safePrime = new BigInteger("2698727");
-    private final CyclicGroup CYCLICGROUP = GStarModSafePrime.getInstance(safePrime);
+    private final CyclicGroup CYCLICGROUP = GStarModSafePrime.getFirstInstance(256);
     private final PedersenCommitmentScheme COMMITMENTSCHEME = PedersenCommitmentScheme.getInstance(CYCLICGROUP);
     
     public Element getTag() {
@@ -47,7 +46,7 @@ public class PedersenScheme {
         return COMMITMENTSCHEME.getMessageSpace().getElement(value);
     }
     
-    public Element getElement(ByteArray value) {
+    public Element getElement(ByteArray value) throws UniCryptException {
         return COMMITMENTSCHEME.getMessageSpace().getElementFrom(value);        
     }
     
