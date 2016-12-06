@@ -1,15 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ch.bfh.ti.hutzf1.vpriv_server.serviceprovider;
 
 import ch.bfh.ti.hutzf1.vpriv_server.crypto.OneWayFunction;
 import ch.bfh.ti.hutzf1.vpriv_server.crypto.PedersenScheme;
 import ch.bfh.ti.hutzf1.vpriv_server.db.DB;
 import ch.bfh.ti.hutzf1.vpriv_server.log.Log;
-import ch.bfh.unicrypt.math.algebra.general.interfaces.Element;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.ResultSet;
@@ -19,7 +13,7 @@ import org.json.JSONObject;
 
 /**
  *
- * @author fh
+ * @author Fabian Hutzli
  */
 
 public class ServiceProvider {
@@ -216,7 +210,7 @@ public class ServiceProvider {
                     log.console("dvi" + x + " " + bb.toString());
                     log.console("rsVehicleTag " + cc.toString());
 
-                    ab = ps.commit(ps.getElement(cc), ps.getElement(bb)).convertToBigInteger();
+                    ab = ps.commit(cc, bb);
 
                     log.console("commits " + ab.toString());
                     log.console(String.valueOf(cc.equals(ab))); 
