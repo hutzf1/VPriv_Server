@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ch.bfh.ti.hutzf1.vpriv_server.crypto;
 
 import ch.bfh.unicrypt.UniCryptException;
@@ -16,30 +11,21 @@ import java.math.BigInteger;
 
 /**
  *
- * @author fh
+ * @author Fabian Hutzli
  */
 
 public class PedersenScheme {
     private final CyclicGroup CYCLICGROUP = GStarModSafePrime.getFirstInstance(256);
     private final PedersenCommitmentScheme COMMITMENTSCHEME = PedersenCommitmentScheme.getInstance(CYCLICGROUP);
     
-    public Element getTag() {
+    /*public Element getRandomElement() {
         Element message = COMMITMENTSCHEME.getRandomizationSpace().getRandomElement();
         return message;
-    }
+    }*/
     
-    public Element getKey() {
+    public BigInteger getRandomElement() {
         Element message = COMMITMENTSCHEME.getRandomizationSpace().getRandomElement();
-        return message;
-    }
-    
-    public Element getOpeningKey() {
-        Element randomization = COMMITMENTSCHEME.getRandomizationSpace().getRandomElement();
-        return randomization;
-    }
-    
-    public Element getElement(int value) {
-        return COMMITMENTSCHEME.getMessageSpace().getElement(value);
+        return message.convertToBigInteger();
     }
     
     public Element getElement(BigInteger value) {
@@ -49,15 +35,24 @@ public class PedersenScheme {
     public Element getElement(ByteArray value) throws UniCryptException {
         return COMMITMENTSCHEME.getMessageSpace().getElementFrom(value);        
     }
+
+    public BigInteger commit(BigInteger message, BigInteger key) {
+        Element commitment = COMMITMENTSCHEME.commit(this.getElement(message), this.getElement(key));
+        return commitment.convertToBigInteger();
+    }
     
-    public Element commit(Element message, Element key) {
+    /*public Element commit(Element message, Element key) {
         Element commitment = COMMITMENTSCHEME.commit(message, key);
         return commitment;
-    }
+    }*/
     
-    public BooleanElement decommit(Element message, Element key, Element commitment) {
+    public Boolean decommit(BigInteger message, BigInteger key, BigInteger commitment) {
+        BooleanElement result = COMMITMENTSCHEME.decommit(this.getElement(message), this.getElement(key), this.getElement(commitment));
+        return result.getValue();
+    } 
+    
+    /*public Boolean decommit(Element message, Element key, Element commitment) {
         BooleanElement result = COMMITMENTSCHEME.decommit(message, key, commitment);
-        return result;
-    }
-    
+        return result.getValue();
+    }*/
 }
