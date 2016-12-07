@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -12,7 +14,6 @@ import java.sql.ResultSet;
  */
 
 public class DB {
-    
     // Connect to database.
     String connectionString = 
         "jdbc:sqlserver://btdev.database.windows.net:1433;"
@@ -27,28 +28,59 @@ public class DB {
     // Declare the JDBC objects.  
     Connection connection = null;   
     
+    /**
+     *
+     */
+    
     public void connect() {
-        try {  
+        try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             connection = DriverManager.getConnection(connectionString);  
-        }  
-        catch (ClassNotFoundException | SQLException e) {  
-        }    
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
-    public void disconnect() throws SQLException {
-        connection.close();
+    /**
+     *
+     */
+    
+    public void disconnect() {
+        try {
+            connection.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
-    public void execute(String query) throws SQLException {
-        // Create and execute an SQL statement that returns some data.  
-        Statement stmt = connection.createStatement();  
-        stmt.execute(query);  
+    /**
+     *
+     * @param query
+     */
+    
+    public void execute(String query) {
+        try {
+            Statement stmt = connection.createStatement();  
+            stmt.execute(query);
+        } catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
-    public ResultSet executeQuery(String query) throws SQLException {
-        // Create and execute an SQL statement that returns some data.  
-        Statement stmt = connection.createStatement();  
-        return stmt.executeQuery(query);  
+    /**
+     *
+     * @param query
+     * @return
+     */
+    
+    public ResultSet executeQuery(String query) {
+        ResultSet rs = null;
+        try {
+            Statement stmt = connection.createStatement();  
+            rs = stmt.executeQuery(query);
+        } catch (SQLException ex) {
+            Logger.getLogger(DB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return rs;
     }
 }

@@ -8,6 +8,8 @@ import ch.bfh.unicrypt.math.algebra.general.interfaces.CyclicGroup;
 import ch.bfh.unicrypt.math.algebra.general.interfaces.Element;
 import ch.bfh.unicrypt.math.algebra.multiplicative.classes.GStarModSafePrime;
 import java.math.BigInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -22,20 +24,50 @@ public class PedersenScheme {
         Element message = COMMITMENTSCHEME.getRandomizationSpace().getRandomElement();
         return message;
     }*/
+
+    /**
+     *
+     * @return
+     */
     
     public BigInteger getRandomElement() {
         Element message = COMMITMENTSCHEME.getRandomizationSpace().getRandomElement();
         return message.convertToBigInteger();
     }
     
+    /**
+     *
+     * @param value
+     * @return
+     */
+    
     public Element getElement(BigInteger value) {
         return COMMITMENTSCHEME.getMessageSpace().getElement(value);
     }
     
-    public Element getElement(ByteArray value) throws UniCryptException {
-        return COMMITMENTSCHEME.getMessageSpace().getElementFrom(value);        
+    /**
+     *
+     * @param value
+     * @return
+     */
+    
+    public Element getElement(ByteArray value) {
+        Element bArray = null;
+        try {        
+            bArray = COMMITMENTSCHEME.getMessageSpace().getElementFrom(value);
+        } catch (UniCryptException ex) {
+            Logger.getLogger(PedersenScheme.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return bArray;
     }
 
+    /**
+     *
+     * @param message
+     * @param key
+     * @return
+     */
+    
     public BigInteger commit(BigInteger message, BigInteger key) {
         Element commitment = COMMITMENTSCHEME.commit(this.getElement(message), this.getElement(key));
         return commitment.convertToBigInteger();
@@ -45,6 +77,14 @@ public class PedersenScheme {
         Element commitment = COMMITMENTSCHEME.commit(message, key);
         return commitment;
     }*/
+
+    /**
+     *
+     * @param message
+     * @param key
+     * @param commitment
+     * @return
+     */
     
     public Boolean decommit(BigInteger message, BigInteger key, BigInteger commitment) {
         BooleanElement result = COMMITMENTSCHEME.decommit(this.getElement(message), this.getElement(key), this.getElement(commitment));

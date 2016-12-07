@@ -1,13 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ch.bfh.ti.hutzf1.vpriv_server;
 
 import ch.bfh.ti.hutzf1.vpriv_server.serviceprovider.ServiceProvider;
-import java.io.IOException;
-import java.sql.SQLException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Consumes;
@@ -22,7 +15,7 @@ import org.json.JSONObject;
 /**
  * REST Web Service
  *
- * @author fh
+ * @author Fabian Hutzli
  */
 @Path("ServiceProvider/{Parameter}")
 public class ServiceProviderResource {
@@ -30,11 +23,12 @@ public class ServiceProviderResource {
     private UriInfo context;
 
     private final ServiceProvider sp;
+    
     /**
      * Creates a new instance of ServiceProviderResource
-     * @throws java.io.IOException
      */
-    public ServiceProviderResource() throws IOException {
+    
+    public ServiceProviderResource() {
         this.sp = new ServiceProvider();
     }
 
@@ -43,9 +37,10 @@ public class ServiceProviderResource {
      * @param parameter
      * @return an instance of java.lang.String
      */
+    
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getJson(@PathParam("Parameter") String parameter) throws SQLException {
+    public String getJson(@PathParam("Parameter") String parameter) {
         System.out.println(parameter);
         JSONObject jo = new JSONObject();
         switch (parameter) {
@@ -61,11 +56,11 @@ public class ServiceProviderResource {
      * PUT method for updating or creating an instance of ServiceProviderResource
      * @param parameter
      * @param str
-     * @throws java.sql.SQLException
      */
+    
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public void putJson(@PathParam("Parameter") String parameter, String str) throws SQLException {
+    public void putJson(@PathParam("Parameter") String parameter, String str) {
         JSONObject jo = new JSONObject(str);
         System.out.println(parameter);
         switch (parameter) {
