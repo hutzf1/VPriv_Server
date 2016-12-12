@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Handles the Logs to Console, File or Exceptions
  * @author Fabian Hutzli
  */
 

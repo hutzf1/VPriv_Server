@@ -1,3 +1,10 @@
+/*
+ * VPriv Client Server Simulator
+ * Copyright 2017 Fabian Hutzli
+ * Berner Fachhochschule
+ *
+ * All rights reserved.
+ */
 package ch.bfh.ti.hutzf1.vpriv_server;
 
 import java.util.Set;

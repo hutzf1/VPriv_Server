@@ -8,20 +8,18 @@ import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.JSONObject;
 
 /**
- *
+ * Defines the Service Provider and all its functions.
  * @author Fabian Hutzli
  */
 
 public class ServiceProvider {
     
-    private final PedersenScheme ps;
-    private final Log log;
-    private final OneWayFunction hash;
+    private final PedersenScheme PS;
+    private final Log LOG;
+    private final OneWayFunction HASH;
     private final DB DB;
 
     /**
@@ -29,10 +27,10 @@ public class ServiceProvider {
      */
     
     public ServiceProvider() {
-        this.log = new Log();
-        this.ps = new PedersenScheme();
-        this.hash =  new OneWayFunction();
-        this.DB = new DB();
+        this.LOG = new Log();
+        this.PS = new PedersenScheme(LOG);
+        this.HASH =  new OneWayFunction(PS);
+        this.DB = new DB(LOG);
     }
     
     private void cleanUp() {
@@ -56,7 +54,7 @@ public class ServiceProvider {
         int deviceId = 0;
         
         try {
-            log.console("SELECT ID FROM Devices WHERE DeviceIdentity = N'" + DeviceIdentity + "';");
+            LOG.console("SELECT ID FROM Devices WHERE DeviceIdentity = N'" + DeviceIdentity + "';");
             
             ResultSet rs = DB.executeQuery("SELECT ID FROM Devices WHERE DeviceIdentity = N'" + DeviceIdentity + "'");
             
@@ -64,7 +62,7 @@ public class ServiceProvider {
                 deviceId = rs.getInt("ID");    
             }
         } catch (SQLException ex) {
-            Logger.getLogger(ServiceProvider.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.exception(ex);
         }
         
         return deviceId;
@@ -79,19 +77,19 @@ public class ServiceProvider {
         DB.connect();
         
         if(jo.getInt("round") == 0) {
-            //cleanUp();
-            log.console("INSERT INTO Devices VALUES (N'" + jo.getString("id") + "');");
+            cleanUp();
+            LOG.console("INSERT INTO Devices VALUES (N'" + jo.getString("id") + "');");
             DB.execute("INSERT INTO Devices VALUES (N'" + jo.getString("id") + "');");
         }
         
         int getId = this.getDeviceId(jo.getString("id"));
         
-        for(int i = 0; i < jo.length()-4; i++) {
-            log.console("INSERT INTO Tags VALUES (" + getId + ", " + jo.getInt("round") + ", N'" + jo.getBigInteger("v" + i) + "');");
+        for(int i = 0; i < jo.length()-3; i++) {
+            LOG.console("INSERT INTO Tags VALUES (" + getId + ", " + jo.getInt("round") + ", N'" + jo.getBigInteger("v" + i) + "');");
             DB.execute("INSERT INTO Tags VALUES (" + getId + ", " + jo.getInt("round") + ", N'" + jo.getBigInteger("v" + i) + "');");
         }
         
-        log.console("INSERT INTO RoundKeys VALUES (" + getId + ", " + jo.getInt("round") + ", N'" + jo.getBigInteger("key") + "');");
+        LOG.console("INSERT INTO RoundKeys VALUES (" + getId + ", " + jo.getInt("round") + ", N'" + jo.getBigInteger("key") + "');");
         DB.execute("INSERT INTO RoundKeys VALUES (" + getId + ", " + jo.getInt("round") + ", N'" + jo.getBigInteger("key") + "');");
         
         DB.disconnect();
@@ -108,7 +106,7 @@ public class ServiceProvider {
         
         DB.connect();
 
-        log.console("INSERT INTO DrivingRecords VALUES (N'" + jo.getBigInteger("tag") + "', " + jo.getInt("longitude") + ", " + jo.getInt("latitude") + ", N'" + jo.getString("timestamp") + "', " + toll + ");");
+        LOG.console("INSERT INTO DrivingRecords VALUES (N'" + jo.getBigInteger("tag") + "', " + jo.getInt("longitude") + ", " + jo.getInt("latitude") + ", N'" + jo.getString("timestamp") + "', " + toll + ");");
         DB.execute("INSERT INTO DrivingRecords VALUES (N'" + jo.getBigInteger("tag") + "', " + jo.getInt("longitude") + ", " + jo.getInt("latitude") + ", N'" + jo.getString("timestamp") + "', " + toll + ");");  
         
         DB.disconnect();
@@ -124,7 +122,7 @@ public class ServiceProvider {
         
         int getId = this.getDeviceId(jo.getString("id"));
         
-        log.console("INSERT INTO Round VALUES (" + getId + ", 0, " + jo.getInt("cost") + ");");
+        LOG.console("INSERT INTO Round VALUES (" + getId + ", 0, " + jo.getInt("cost") + ");");
         DB.execute("INSERT INTO Round VALUES (" + getId + ", 0, " + jo.getInt("cost") + ");");
         
         DB.disconnect();
@@ -141,7 +139,7 @@ public class ServiceProvider {
         int getId = this.getDeviceId(jo.getString("id"));
         
         for(int x = 1; x <= (jo.length() - 2) / 2; x++) {
-            log.console("INSERT INTO PermutedRecords VALUES (" + getId + ", " + jo.getInt("U") + ", N'" + jo.getBigInteger("w" + x) + "', N'" + jo.getBigInteger("c" + x) + "');");
+            LOG.console("INSERT INTO PermutedRecords VALUES (" + getId + ", " + jo.getInt("U") + ", N'" + jo.getBigInteger("w" + x) + "', N'" + jo.getBigInteger("c" + x) + "');");
             DB.execute("INSERT INTO PermutedRecords VALUES (" + getId + ", " + jo.getInt("U") + ", N'" + jo.getBigInteger("w" + x) + "', N'" + jo.getBigInteger("c" + x) + "');");
         }
         
@@ -157,7 +155,7 @@ public class ServiceProvider {
         JSONObject jo = new JSONObject();
         Random rand = new Random();
         //jo.put("bi", rand.nextInt(2));
-        jo.put("bi", 1);
+        jo.put("bi", 0);
         return jo;
     }
     
@@ -173,13 +171,13 @@ public class ServiceProvider {
             rs = DB.executeQuery("SELECT Tag, Cost FROM DrivingRecords;");
             while (rs.next()) {
                 jo.put("w" + i, rs.getString("Tag"));
-                log.console(rs.getString("Tag"));
+                LOG.console(rs.getString("Tag"));
                 jo.put("c" + i, rs.getInt("Cost"));
-                log.console(rs.getString("Cost"));
+                LOG.console(rs.getString("Cost"));
                 i++;
             }
         } catch (SQLException ex) {
-            Logger.getLogger(ServiceProvider.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.exception(ex);
         }
         
         DB.disconnect();
@@ -193,39 +191,78 @@ public class ServiceProvider {
      */
     
     public void putControlData0(JSONObject jo) {
-        log.console(jo.toString());
+        this.LOG.console("///// START RECON PHASE 0");
+        LOG.console(jo.toString());
         DB.connect();
 
+        int cost = 0;
         int getId = this.getDeviceId(jo.getString("id"));
 
         BigInteger openingKey = jo.getBigInteger("dki");
         BigInteger getKey = null;   
         
-        ResultSet rsKey = DB.executeQuery("SELECT RoundKey FROM RoundKeys WHERE VehicleId = N'" + getId + "'");
+        ResultSet rsKey = DB.executeQuery("SELECT RoundKey FROM RoundKeys WHERE DeviceId = N'" + getId + "'");
         
         try {
             while (rsKey.next()) {
                 getKey = BigInteger.valueOf(rsKey.getLong("RoundKey"));
             }
         } catch (SQLException ex) {
-            Logger.getLogger(ServiceProvider.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.exception(ex);
         }
+        
+        //this.LOG.console(getKey.toString());
+        //this.LOG.console(jo.getBigInteger("dki").toString());
+       
+        BigInteger ki = this.PS.decommit(getKey, openingKey);        
+        this.LOG.console(ki.toString());
             
-        ResultSet rsPermutedRecords = DB.executeQuery("SELECT Tag, Cost FROM PermutedRecords WHERE VehicleId = N'" + getId + "'");
+        ResultSet rsDrivingRecords = DB.executeQuery("SELECT Tag, Cost FROM DrivingRecords");
+        ResultSet rsPermutedRecords = DB.executeQuery("SELECT Tag, Cost FROM PermutedRecords WHERE DeviceId = N'" + getId + "'");
+        
+        try {
+            while (rsPermutedRecords.next()) {
+                while (rsDrivingRecords.next()) {
+                    BigInteger dr = this.HASH.getHash(new BigInteger(rsDrivingRecords.getString("Tag")), ki);
+                    BigInteger pr = new BigInteger(rsPermutedRecords.getString("Tag"));
+                    this.LOG.console(dr.toString());
+                    this.LOG.console(pr.toString());
+                    if(dr.equals(pr)){
+                        this.LOG.console(dr + " == " + pr);
+                        BigInteger costDr = new BigInteger(rsDrivingRecords.getString("Cost"));
+                        BigInteger costPr = new BigInteger(rsPermutedRecords.getString("Cost"));
+                        this.LOG.console(costDr.toString());
+                        this.LOG.console(costPr.toString());
+                        cost += costDr.intValue();
+                    }
+                    
+                }
+                rsDrivingRecords.first();
+            }
+            
+        } catch (SQLException ex) {
+            LOG.exception(ex);
+        }
+        
+        this.LOG.console("SP calculated: " + cost);
+        
+        
+        /*
+        ResultSet rsPermutedRecords = DB.executeQuery("SELECT Tag, Cost FROM PermutedRecords WHERE DeviceId = N'" + getId + "'");
         ResultSet rsDrivingRecords = DB.executeQuery("SELECT Tag, Cost FROM DrivingRecords");
         
         try {
             while (rsPermutedRecords.next()) {
                 while (rsDrivingRecords.next()) {
-                    log.console(Integer.toString(rsPermutedRecords.getInt("Tag")));
-                    log.console(Integer.toString(rsDrivingRecords.getInt("Tag")));
-                    log.console(Integer.toString(rsPermutedRecords.getInt("Cost")));
-                    log.console(Integer.toString(rsDrivingRecords.getInt("Cost")));
+                    LOG.console(Integer.toString(rsPermutedRecords.getInt("Tag")));
+                    LOG.console(Integer.toString(rsDrivingRecords.getInt("Tag")));
+                    LOG.console(Integer.toString(rsPermutedRecords.getInt("Cost")));
+                    LOG.console(Integer.toString(rsDrivingRecords.getInt("Cost")));
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(ServiceProvider.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            LOG.exception(ex);
+        }*/
 
     }
     
@@ -235,174 +272,39 @@ public class ServiceProvider {
      */
     
     public void putControlData1(JSONObject jo) {
-        log.console(jo.toString());
+        LOG.console(jo.toString());
         DB.connect();
 
-        BigInteger aa;
-        BigInteger bb;
-        BigInteger cc;
-        BigInteger ab;
-
         int getId = this.getDeviceId(jo.getString("id"));
+        int cost = 0;
 
-        ResultSet rsVehiclePackage = DB.executeQuery("SELECT Tag FROM Tags WHERE VehicleId = N'" + getId + "'");
-        ResultSet rsPermutedPackage = DB.executeQuery("SELECT Tag, Cost FROM PermutedRecords WHERE VehicleId = N'" + getId + "'");
-            
+        ResultSet rsVehiclePackage = DB.executeQuery("SELECT Tag FROM Tags WHERE DeviceId = N'" + getId + "'");
+        ResultSet rsPermutedPackage = DB.executeQuery("SELECT Tag, Cost FROM PermutedRecords WHERE DeviceId = N'" + getId + "'");
+        
         try {
-            while (rsVehiclePackage.next()) {
-                while (rsPermutedPackage.next()) {
-                    for(int x = 1; x <= jo.length() - 2; x++) {
-                        aa = BigInteger.valueOf(rsPermutedPackage.getInt("Tag"));
-                        bb = jo.getBigInteger("dvi" + x);
-                        cc = BigInteger.valueOf(rsVehiclePackage.getInt("Tag"));
-                        
-                        //log.console(aa.toString());
-                        log.console("dvi" + x + " " + bb.toString());
-                        log.console("rsVehicleTag " + cc.toString());
-                        
-                        ab = ps.commit(cc, bb);
-                        
-                        log.console("commits " + ab.toString());
-                        log.console(String.valueOf(cc.equals(ab)));
-                    }
-                }
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(ServiceProvider.class.getName()).log(Level.SEVERE, null, ex);
-        }
-            
-            
-            
-            // SP has: License Plate (id), round (i), commitment of hased tags, all Tags of Driving Phase (unhashed, uncommited)
-            // SP recieves: License Plate (id), Opening Keys for Tags (DV), Opening key for costs (Di), All tags of Driving Phase (permuted and commitment of)
-            // for bi = 1, SP needs:
-            /*
-            
-            int sum = 0;
-            
-            for (DrivingTuple d1 : thispp.getDrivingTuples()) {
-            int i = 0;
-            
-            for (Element e : thisrp.getCommits()) {
-            if(e.equals(ps.commit(d1.tag, dv.get(i)))) {
-            log.file(d1.cost.toString());
-            for(DrivingTuple d2 : W) {
-            if(e.equals(ps.commit(d2.tag, dv.get(i)))){
-            sum = sum + d2.cost.convertToBigInteger().intValue();
-            break;
-            }
-            }
-            }
-            }
-            i++;
-            }*/
-    
-    }
-    
-    /*public int calculate0(String id, Element key, ArrayList<Element> dc) throws IOException {
-        log.file("-----------------------------------");
-        log.file("BI = 0, Service Provider calculates");
-        log.file("-----------------------------------");
-        
-        PermutatedPackage vehiclesPackage = null;
-        
-        for (PermutatedPackage pp : PP) {
-            if(pp.getId().equals(id)) {
-                vehiclesPackage = pp;
-                log.console("Package: " + vehiclesPackage.getId());
-            }
-        }*/
-        
-        /*RoundPackage vehiclesRound = null;
-        
-        for (RoundPackage rp : RP) {
-            if(rp.id == id) {
-                vehiclesRound = rp;
-                log.console("Package: " + vehiclesPackage.id);
-            }
-        }*/
-         
-        /*int sum = 0;
-        
-        for (DrivingTuple dt : W) {
-            int m = 0;
-            for (DrivingTuple vehicleDt : vehiclesPackage.getDrivingTuples()) {
-                if(ps.commit(dt.cost, dc.get(m)).equals(vehicleDt.cost)) {
-                if(hash.getHash(dt.tag, key).equals(vehicleDt.tag)) {
-                    //if(ps.commit(dt.cost, dc.get(m)).equals(vehicleDt.cost)) {
-                        log.file(ps.commit(dt.cost, dc.get(m)).toString());
-                        log.file(vehicleDt.cost.toString());
-                        sum = sum + dt.cost.convertToBigInteger().intValue();
-                        break;
-                    }
-                }
-                m++;
-            }
-        }
-        
-        // Ich erhalte
-        // id vom Fahrzeug
-        // dki vom Fahrzeug
-        // dci1 - dcim vom Fahrzeug
-        //
-        // Ich habe
-        // Ui mit fki(w), c(dci)
-        
-        log.file("-----------------------------------");
-        log.file("-----------------------------------");
-        return sum;
-    }
-    
-    public int calculate1(String id, ArrayList<Element> dv, Element Di) throws IOException {
-        log.file(id + " calculating by service provider");
-        log.file("-----------------------------------");
-        log.file("-----------------------------------");
-        
-        // SP has: License Plate (id), round (i), commitment of hased tags, all Tags of Driving Phase (unhashed, uncommited)
-        // SP recieves: License Plate (id), Opening Keys for Tags (DV), Opening key for costs (Di), All tags of Driving Phase (permuted and commitment of)
-        // for bi = 1, SP needs:
-        
-        PermutatedPackage thispp = null;
-        RoundPackage thisrp = null;
-        
-        for (PermutatedPackage pp : PP){
-            if(pp.getId().equals(id)) {
-                thispp = pp;
-                log.file("pp: " + thispp.getId());
-            }
-        }
-        
-        for (RoundPackage rp : RP){
-            if(rp.getId().equals(id)) {
-                thisrp = rp;
-                log.file("rp: " + thisrp.getId());
-            }
-        }
-        
-        int sum = 0;
-        
-        for (DrivingTuple d1 : thispp.getDrivingTuples()) {
-            int i = 0;
-            
-            for (Element e : thisrp.getCommits()) {
-                if(e.equals(ps.commit(d1.tag, dv.get(i)))) {
-                    log.file(d1.cost.toString());
-                    for(DrivingTuple d2 : W) {
-                        if(e.equals(ps.commit(d2.tag, dv.get(i)))){
-                            sum = sum + d2.cost.convertToBigInteger().intValue();
-                            break;
+            while(rsPermutedPackage.next()) {
+                this.LOG.console(rsPermutedPackage.getString("Tag"));
+                for(int x = 1; x <= jo.length() - 2; x++) {
+                    this.LOG.console(jo.getBigInteger("dvi" + x).toString());
+                    BigInteger commit = this.PS.commit(new BigInteger(rsPermutedPackage.getString("Tag")), jo.getBigInteger("dvi" + x));
+                    while(rsVehiclePackage.next()) {
+                        BigInteger tag = new BigInteger(rsVehiclePackage.getString("Tag"));
+                        this.LOG.console(tag.toString());
+                        if(tag.equals(commit)){
+                            this.LOG.console(tag + " == " + commit);
+                            
+                            ///
+                            ///
+                            /// TODO COST CALCULATION
+                            ///
+                            ///
                         }
                     }
+                    rsVehiclePackage.first();
                 }
-            }
-            i++;
+            }   
+        } catch(SQLException ex) {
+            this.LOG.exception(ex);
         }
-
-        
-        
-        log.file("-----------------------------------");
-        log.file("-----------------------------------");
-        
-        return sum;
-    }*/
+    }
 }
