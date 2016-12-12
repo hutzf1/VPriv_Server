@@ -58,11 +58,18 @@ public class ServiceProvider {
             
             ResultSet rs = DB.executeQuery("SELECT ID FROM Devices WHERE DeviceIdentity = N'" + DeviceIdentity + "'");
             
-            while (rs.next()) {
-                deviceId = rs.getInt("ID");    
+            rs.first();
+             
+            if(rs.isFirst() && rs.isLast()) {
+                deviceId = rs.getInt("ID");
+            }
+            else
+            {
+                this.LOG.both("No or more than one Device found mit id " + DeviceIdentity);
+                System.exit(0);
             }
         } catch (SQLException ex) {
-            LOG.exception(ex);
+            this.LOG.exception(ex);
         }
         
         return deviceId;
@@ -169,6 +176,7 @@ public class ServiceProvider {
      
         try {
             rs = DB.executeQuery("SELECT Tag, Cost FROM DrivingRecords;");
+            //if(rs.wasNull())
             while (rs.next()) {
                 jo.put("w" + i, rs.getString("Tag"));
                 LOG.console(rs.getString("Tag"));
